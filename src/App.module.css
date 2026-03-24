@@ -144,3 +144,37 @@
   color: var(--text3);
   font-size: 14px;
 }
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .header {
+    padding: 10px 14px;
+    height: auto;
+    gap: 10px;
+  }
+
+  .globalStats {
+    display: none;
+  }
+
+  .tabs {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .addBtnLabel {
+    display: none;
+  }
+
+  .addBtn {
+    padding: 7px 10px;
+  }
+}

@@ -160,3 +160,11 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .modal {
+    width: 95vw;
+    padding: 1.2rem;
+  }
+}

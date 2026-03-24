@@ -197,3 +197,21 @@
   color: var(--accent2);
   background: rgba(124,108,250,0.06);
 }
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .container {
+    padding: 12px 10px;
+    height: auto;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow-y: visible;
+  }
+
+  .weekLabel {
+    font-size: 12px;
+    min-width: 0;
+  }
+}
