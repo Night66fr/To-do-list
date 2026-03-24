@@ -1,0 +1,96 @@
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  transition: border-color 0.15s, opacity 0.2s;
+  position: relative;
+}
+
+.card:hover { border-color: var(--border2); }
+.card:hover .del { opacity: 1; }
+
+.done { opacity: 0.45; }
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--border2);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  color: var(--accent2);
+  transition: all 0.15s;
+}
+
+.card:not(.done) .checkbox:hover {
+  border-color: var(--accent);
+  background: rgba(124,108,250,0.1);
+}
+
+.done .checkbox {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.content { flex: 1; min-width: 0; }
+
+.text {
+  font-size: 13px;
+  color: var(--text);
+  display: block;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.done .text { text-decoration: line-through; color: var(--text3); }
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.cat {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 99px;
+  letter-spacing: 0.03em;
+}
+
+.cours { background: var(--cat-cours-bg); color: var(--cat-cours-text); }
+.projet { background: var(--cat-projet-bg); color: var(--cat-projet-text); }
+.perso { background: var(--cat-perso-bg); color: var(--cat-perso-text); }
+.exam { background: var(--cat-exam-bg); color: var(--cat-exam-text); }
+
+.date {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+.del {
+  opacity: 0;
+  background: transparent;
+  border: none;
+  color: var(--text3);
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.del:hover { color: #e5724a; background: rgba(229,114,74,0.1); }
