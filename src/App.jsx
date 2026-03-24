@@ -3,6 +3,7 @@ import { supabase } from './lib/supabase'
 import WeekView from './components/WeekView'
 import BacklogView from './components/BacklogView'
 import TaskModal from './components/TaskModal'
+import AuthForm from './components/AuthForm'
 import styles from './App.module.css'
 
 const TABS = [
@@ -11,37 +12,74 @@ const TABS = [
 ]
 
 export default function App() {
+  const [session, setSession] = useState(undefined) // undefined = chargement, null = déconnecté
   const [tab, setTab] = useState('week')
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState(null) // null | { dayDate?: string }
+  const [modal, setModal] = useState(null)
+
+  // Surveiller la session auth
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session ?? null))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   const fetchTasks = useCallback(async () => {
+    if (!session) return
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
       .order('created_at', { ascending: true })
     if (!error) setTasks(data || [])
     setLoading(false)
-  }, [])
+  }, [session])
 
   useEffect(() => {
+    if (!session) { setTasks([]); setLoading(false); return }
+    setLoading(true)
     fetchTasks()
     const channel = supabase
       .channel('tasks-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, fetchTasks)
       .subscribe()
     return () => supabase.removeChannel(channel)
-  }, [fetchTasks])
+  }, [fetchTasks, session])
 
   const addTask = async ({ text, category, dayDate }) => {
-    await supabase.from('tasks').insert({
+    const tempId = crypto.randomUUID()
+    const optimistic = {
+      id: tempId,
       text,
       category,
       day_date: dayDate || null,
       done: false,
-    })
+      user_id: session.user.id,
+      created_at: new Date().toISOString(),
+      _pending: true,
+    }
+
+    // Affichage immédiat sans attendre Supabase
+    setTasks(prev => [...prev, optimistic])
     setModal(null)
+
+    const { data, error } = await supabase.from('tasks').insert({
+      text,
+      category,
+      day_date: dayDate || null,
+      done: false,
+      user_id: session.user.id,
+    }).select().single()
+
+    if (error) {
+      // Rollback si erreur
+      setTasks(prev => prev.filter(t => t.id !== tempId))
+    } else {
+      // Remplacer l'entrée temporaire par la vraie (avec le vrai id Supabase)
+      setTasks(prev => prev.map(t => t.id === tempId ? data : t))
+    }
   }
 
   const toggleTask = async (id, done) => {
@@ -57,6 +95,20 @@ export default function App() {
   const assignDay = async (id, dayDate) => {
     await supabase.from('tasks').update({ day_date: dayDate }).eq('id', id)
     setTasks(prev => prev.map(t => t.id === id ? { ...t, day_date: dayDate } : t))
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+  }
+
+  // Chargement initial
+  if (session === undefined) {
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>Chargement...</div>
+  }
+
+  // Non connecté → écran de login
+  if (!session) {
+    return <AuthForm />
   }
 
   const total = tasks.length
@@ -87,12 +139,19 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <button className={styles.addBtn} onClick={() => setModal({})}>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-          </svg>
-          Nouvelle tâche
-        </button>
+        <div className={styles.headerRight}>
+          <button className={styles.addBtn} onClick={() => setModal({})}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+            Nouvelle tâche
+          </button>
+          <button className={styles.logoutBtn} onClick={handleLogout} title="Se déconnecter">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M5 2H2a1 1 0 00-1 1v8a1 1 0 001 1h3M9 10l3-3-3-3M12 7H5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
       </header>
 
       <main className={styles.main}>

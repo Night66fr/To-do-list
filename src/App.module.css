@@ -25,6 +25,12 @@
   flex: 1;
 }
 
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .logo {
   font-size: 17px;
   font-weight: 600;
@@ -103,6 +109,26 @@
 
 .addBtn:hover {
   background: rgba(124,108,250,0.2);
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.logoutBtn:hover {
+  background: var(--bg2);
+  color: var(--text);
+  border-color: var(--border2);
 }
 
 .main {
